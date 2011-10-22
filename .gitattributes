@@ -18,6 +18,16 @@ MSVisualStudioOSExamples/osRemoteTest.vcproj -text
 MSVisualStudioOSExamples/osResultDemo.vcproj -text
 MSVisualStudioOSExamples/osSolverDemo.vcproj -text
 MSVisualStudioOSExamples/template.vcproj -text
+MSVisualStudioOSExamples/v9/algorithmicDiff.vcproj -text
+MSVisualStudioOSExamples/v9/branchCutPrice.vcproj -text
+MSVisualStudioOSExamples/v9/cglCuts.vcproj -text
+MSVisualStudioOSExamples/v9/instanceGenerator.vcproj -text
+MSVisualStudioOSExamples/v9/osExamples.sln -text
+MSVisualStudioOSExamples/v9/osModificationDemo.vcproj -text
+MSVisualStudioOSExamples/v9/osRemoteTest.vcproj -text
+MSVisualStudioOSExamples/v9/osResultDemo.vcproj -text
+MSVisualStudioOSExamples/v9/osSolverDemo.vcproj -text
+MSVisualStudioOSExamples/v9/template.vcproj -text
 /Makefile.am -text
 /Makefile.in -text
 /NEWS -text
