@@ -19,6 +19,7 @@ MSVisualStudio-v9/osRemoteTest/osRemoteTest.vcproj -text
 MSVisualStudio-v9/osResultDemo/osResultDemo.vcproj -text
 MSVisualStudio-v9/osSolverDemo/osSolverDemo.vcproj -text
 MSVisualStudio-v9/template/template.vcproj -text
+/Makefile.Examples.in -text
 /Makefile.am -text
 /Makefile.in -text
 /NEWS -text
