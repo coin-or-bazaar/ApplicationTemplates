@@ -61,6 +61,7 @@ data/genAssign.osil -text
 data/genAssign.osol -text
 data/knock.ospl -text
 data/nonconvex.osil -text
+data/osdip.parm -text
 data/p0033.osil -text
 data/parinc.mps -text
 data/parincLinear.osil -text
