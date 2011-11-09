@@ -1,12 +1,12 @@
 * text=auto !eol
 /AUTHORS -text
-/COPYING -text
 /ChangeLog -text
 Excel/OSWebServiceGUI.xlsm -text
 Excel/clsOSInstance.cls -text
 Excel/clsws_OSSolverServiceServic.cls -text
 Excel/parIncVBA.xlsm -text
 /INSTALL -text
+/LICENSE -text
 MSVisualStudio-v9/VISUALSTUDIOREADME.txt -text
 MSVisualStudio-v9/algorithmicDiff/algorithmicDiff.vcproj -text
 MSVisualStudio-v9/branchCutPrice/branchCutPrice.vcproj -text
@@ -22,7 +22,6 @@ MSVisualStudio-v9/template/template.vcproj -text
 /Makefile.Examples.in -text
 /Makefile.am -text
 /Makefile.in -text
-/NEWS -text
 /README -text
 algorithmicDiff/Makefile.in -text
 algorithmicDiff/OSAlgorithmicDiffTest.cpp -text
@@ -96,8 +95,6 @@ osDip/OSDipInterface.cpp -text
 osDip/OSDipInterface.h -text
 osDip/OSDipParam.h -text
 osDip/OSDip_Main.cpp -text
-osDip/osDip.pdf -text svneol=unset#unset
-osDip/osDip.tex -text
 osDip/osdip.parm.in -text
 osDip/own.sty -text
 osDip/solvers/OSDipBlockBearcatSolver.cpp -text
