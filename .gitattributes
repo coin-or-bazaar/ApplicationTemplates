@@ -1,5 +1,6 @@
 * text=auto !eol
 /AUTHORS -text
+/COPYING -text
 /ChangeLog -text
 Excel/OSWebServiceGUI.xlsm -text
 Excel/clsOSInstance.cls -text
@@ -22,6 +23,7 @@ MSVisualStudio-v9/template/template.vcproj -text
 /Makefile.Examples.in -text
 /Makefile.am -text
 /Makefile.in -text
+/NEWS -text
 /README -text
 algorithmicDiff/Makefile.in -text
 algorithmicDiff/OSAlgorithmicDiffTest.cpp -text
