@@ -109,6 +109,8 @@ data/osolFiles/tmp5.osol -text
 data/osplFiles/demo.ospl -text
 data/osplFiles/knock.ospl -text
 data/osplFiles/result.ospl -text
+data/osrlFiles/OSrL.xslt -text
+data/osrlFiles/parincLinear.osrl -text
 instanceGenerator/Makefile.in -text
 instanceGenerator/OSInstanceGenerator.cpp -text
 osDip/Makefile.in -text
