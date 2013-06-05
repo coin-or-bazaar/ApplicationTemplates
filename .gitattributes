@@ -64,9 +64,12 @@ cglCuts/OSCglCuts.cpp -text
 data/amplFiles/bonminEx1.nl -text
 data/amplFiles/eastborne.mod -text
 data/amplFiles/eastborne.nl -text
+data/amplFiles/hs71.nl -text
 data/configFiles/kill.config -text
 data/configFiles/testLocal.config -text
 data/configFiles/testRemote.config -text
+data/configFiles/testRemote1.config -text
+data/configFiles/testRemote2.config -text
 data/configFiles/testRemoteKnock.config -text
 data/configFiles/testRemoteRetrieve.config -text
 data/configFiles/testRemoteSend.config -text
