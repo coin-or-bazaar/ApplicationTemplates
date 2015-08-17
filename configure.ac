@@ -274,7 +274,7 @@ AC_COIN_VPATH_LINK(data/amplFiles/eastborne.nl)
 
 AC_COIN_VPATH_LINK(data/configFiles/kill.config)
 AC_COIN_VPATH_LINK(data/configFiles/testLocal.config)
-AC_COIN_VPATH_LINK(data/configFiles/testcalclp.config)
+AC_COIN_VPATH_LINK(data/configFiles/testlocalclp.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemote.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemoteKnock.config)
 AC_COIN_VPATH_LINK(data/configFiles/testRemoteRetrieve.config)

@@ -24234,7 +24234,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/configFiles/testcalclp.config"
+  cvl_tmp="data/configFiles/testlocalclp.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
