@@ -1,15 +1,14 @@
 /* $Id: template.cpp 2710 2009-06-10 21:13:43Z kmartin $ */
 /** @file template.cpp
  * 
- * @author  Horand Gassmann, Jun Ma, Kipp Martin, 
+ * @author  Horand Gassmann, Jun Ma, Kipp Martin
  *
  * \remarks
- * Copyright (C) 2005-2011, Horand Gassmann, Jun Ma, Kipp Martin,
- * Dalhousie University, Northwestern University, and the University of Chicago.
+ * Copyright (C) 2005-2015, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Northwestern University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Eclipse Public License. 
  * Please see the accompanying LICENSE file in root directory for terms.
- * 
  */ 
  
 //#include <cppad/cppad.hpp> 
@@ -27,7 +26,7 @@
 #include "OSDefaultSolver.h"     
 #include "OShL.h"     
 #include "OSErrorClass.h"
-#include "OSmps2osil.h"   
+#include "OSmps2OS.h"   
 #include "OSBase64.h"
 #include "OSErrorClass.h"
 #include "OSMathUtil.h"
@@ -170,7 +169,7 @@ int main(int argC, char* argV[]){
 		* Get an instance in mps format, and create an OSInstance object
 		*/
 		std::string qpFileName;
-		qpFileName =  dataDir  +  "parincQuadratic.osil";
+		qpFileName =  dataDir  +  "osilFiles" + dirsep +  "parincQuadratic.osil";
 		// convert to the OS native format
 		osil = fileUtil->getFileAsString( qpFileName.c_str() );
 		osilreader = new OSiLReader(); 
