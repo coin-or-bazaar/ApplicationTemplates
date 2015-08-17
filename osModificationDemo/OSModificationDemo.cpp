@@ -29,7 +29,7 @@
 //#include "OSSolverAgent.h"   
 #include "OShL.h"     
 #include "OSErrorClass.h"
-#include "OSmps2osil.h"   
+#include "OSmps2OS.h"   
 #include "OSBase64.h"
 #include "OSErrorClass.h"
 #include "OSMathUtil.h"
@@ -208,7 +208,6 @@ int main( ){
 		delete fileUtil;
 		fileUtil = NULL;
 		cout << "Done with garbage collection" << endl;
-		cout << "Program terminates normally" << endl;
 		return 0;
 		//
 	}

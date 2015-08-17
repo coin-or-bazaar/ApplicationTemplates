@@ -27,7 +27,7 @@
 #include "OSDefaultSolver.h"     
 #include "OShL.h"     
 #include "OSErrorClass.h"
-#include "OSmps2osil.h"   
+#include "OSmps2OS.h"   
 #include "OSBase64.h"
 #include "OSErrorClass.h"
 #include "OSMathUtil.h"
@@ -170,7 +170,7 @@ int main(int argC, char* argV[]){
 		* Get an instance in mps format, and create an OSInstance object
 		*/
 		std::string qpFileName;
-		qpFileName =  dataDir  +  "parincQuadratic.osil";
+		qpFileName =  dataDir  +  "osilFiles" + dirsep + "parincQuadratic.osil";
 		// convert to the OS native format
 		osil = fileUtil->getFileAsString( qpFileName.c_str() );
 		osilreader = new OSiLReader(); 
@@ -417,7 +417,8 @@ int main(int argC, char* argV[]){
 	
 	delete fileUtil;
 	fileUtil = NULL;	
-	std::cout << "Program terminates normally" << std::endl;
+        std::cout << std::endl << "Execution terminated normally" << std::endl;
+
 	return 0;
 	
 	}

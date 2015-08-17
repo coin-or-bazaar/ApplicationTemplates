@@ -470,7 +470,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os ALWAYS_FALSE_TRUE ALWAYS_FALSE_FALSE CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS sol_cc_compiler CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT COIN_CC_IS_CL_TRUE COIN_CC_IS_CL_FALSE MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX COIN_CXX_IS_CL_TRUE COIN_CXX_IS_CL_FALSE MPICXX F77 ac_ct_F77 ADD_FFLAGS DBG_FFLAGS OPT_FFLAGS FFLAGS MPIF77 FLIBS EGREP LN_S INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS LT_LDFLAGS MSCL__TRUE MSCL__FALSE EXAMPLESROOT_DIR LIBEXT VPATH_DISTCLEANFILES ABSBUILDDIR LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os ALWAYS_FALSE_TRUE ALWAYS_FALSE_FALSE CDEFS ADD_CFLAGS DBG_CFLAGS OPT_CFLAGS sol_cc_compiler CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT COIN_CC_IS_CL_TRUE COIN_CC_IS_CL_FALSE MPICC CXXDEFS ADD_CXXFLAGS DBG_CXXFLAGS OPT_CXXFLAGS CXX CXXFLAGS ac_ct_CXX COIN_CXX_IS_CL_TRUE COIN_CXX_IS_CL_FALSE MPICXX F77 ac_ct_F77 ADD_FFLAGS DBG_FFLAGS OPT_FFLAGS FFLAGS MPIF77 FLIBS EGREP LN_S INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIBTOOLM4 have_autoconf have_automake have_svn BUILDTOOLSDIR AUX_DIR abs_source_dir abs_lib_dir abs_include_dir abs_bin_dir HAVE_EXTERNALS_TRUE HAVE_EXTERNALS_FALSE host host_cpu host_vendor host_os ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP LIBTOOL ac_c_preproc_warn_flag ac_cxx_preproc_warn_flag RPATH_FLAGS DEPENDENCY_LINKING_TRUE DEPENDENCY_LINKING_FALSE LT_LDFLAGS MSCL__TRUE MSCL__FALSE EXAMPLESROOT_DIR LIBEXT VPATH_DISTCLEANFILES ABSBUILDDIR LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1091,11 +1091,8 @@ Optional Features:
   --enable-debug          compile all projects with debug options tests
                           (implies --disable-shared)
   --enable-debug-examples compile project examples with debug compiler flags
-  --enable-doscompile     Under Cygwin, compile so that executables run under
-                          DOS. Set to mingw to use gcc/g++/ld with
-                          -mno-cygwin. Set to msvc to use cl/link (or
-                          icl/link). Default when mentioned: mingw. Default
-                          when not mentioned: disabled.
+
+  --enable-msvc           Prefer (i)cl/ifort/link over GNU on MinGW/Cygwin.
   --enable-static[=PKGS]
                           build static libraries [default=no]
   --disable-dependency-tracking  speeds up one-time build
@@ -1107,6 +1104,9 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-dependency-linking
+                          disable linking library dependencies into shared
+                          libraries
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1811,56 +1811,46 @@ _ACEOF
 
 # Get the name of the C++ compiler and appropriate compiler options
 coin_opt_cxxflags="-O3"
-case $build in
-  *-mingw*)
-    if test "${LD+set}" = set; then :; else
-      LD=link
-    fi
-    ;;
- esac
- case $enable_doscompile in
-   msvc)
-     if test "x${LD+set}" = xset; then :; else
-       LD=link
-     fi
-     ;;
- esac
 
 
- # Check whether --enable-doscompile or --disable-doscompile was given.
+  # for backward compatibility
+  # Check whether --enable-doscompile or --disable-doscompile was given.
 if test "${enable_doscompile+set}" = set; then
   enableval="$enable_doscompile"
-  if test "$enable_doscompile" != no; then
-     case $build in
-       *-cygwin* | *-mingw*) ;;
-       *) { { echo "$as_me:$LINENO: error: --enable-doscompile option makes sense only under Cygwin or MinGW" >&5
-echo "$as_me: error: --enable-doscompile option makes sense only under Cygwin or MinGW" >&2;}
-   { (exit 1); exit 1; }; } ;;
-     esac
-   fi
+  enable_doscompile=$enableval
 else
   enable_doscompile=no
 fi;
- case "$enable_doscompile" in
-   mingw)
-     case $build in
-       *-mingw*) enable_doscompile=no ;;
-     esac
-     ;;
-   msvc|no) ;;
-   yes) enable_doscompile=mingw ;;
-   *) { { echo "$as_me:$LINENO: error: Invalid value $enable_doscompile for --enable-doscompile.
-		    Try configure --help=recursive." >&5
-echo "$as_me: error: Invalid value $enable_doscompile for --enable-doscompile.
-		    Try configure --help=recursive." >&2;}
+
+  # Check whether --enable-msvc or --disable-msvc was given.
+if test "${enable_msvc+set}" = set; then
+  enableval="$enable_msvc"
+  enable_msvc=$enableval
+else
+  enable_msvc=no
+     if test "$enable_doscompile" = msvc ; then
+       enable_msvc=yes
+     elif test "$enable_doscompile" != no ; then
+       { { echo "$as_me:$LINENO: error: --enable-doscompile=$enable_doscompile not supported anymore." >&5
+echo "$as_me: error: --enable-doscompile=$enable_doscompile not supported anymore." >&2;}
    { (exit 1); exit 1; }; }
-      ;;
-  esac
-  if test "$enable_doscompile" != no ; then
-    { echo "$as_me:$LINENO: DOS compile style is: $enable_doscompile" >&5
-echo "$as_me: DOS compile style is: $enable_doscompile" >&6;}
+     fi
+
+fi;
+
+  if test "$enable_msvc" = MD; then
+    enable_shared=yes
+    enable_msvc=yes
   fi
 
+  if test "$enable_msvc" = yes; then
+    case $build in
+      *-cygwin* | *-mingw*) ;;
+      *) { { echo "$as_me:$LINENO: error: --enable-msvc option makes sense only under Cygwin or MinGW" >&5
+echo "$as_me: error: --enable-msvc option makes sense only under Cygwin or MinGW" >&2;}
+   { (exit 1); exit 1; }; } ;;
+    esac
+  fi
 
 
 
@@ -1902,10 +1892,10 @@ save_cflags="$CFLAGS"
 
 case $build in
   *-cygwin* | *-mingw*)
-  	     if test "$enable_doscompile" = msvc ; then
-	       comps="icl cl"
+  	     if test "$enable_msvc" = yes ; then
+	       comps="icl cl gcc"
 	     else
-	       comps="gcc cl"
+	       comps="gcc icl cl"
 	     fi ;;
   *-*-solaris*)
 	     # Extract the first word of "cc", so it can be a program name with args.
@@ -1966,6 +1956,7 @@ fi
 	       comps="xlc gcc pgcc icc cc"
 	     fi
 	     ;;
+  *-*-darwin*) comps="clang gcc cc" ;;
   *-linux-gnu*) comps="gcc cc pgcc icc xlc" ;;
   *-linux-*) comps="xlc gcc cc pgcc icc" ;;
   *)         comps="xlc_r xlc cc gcc pgcc icc" ;;
@@ -2702,6 +2693,11 @@ case "$CC" in
       { echo "$as_me:$LINENO: Overruling autoconf; cl does not recognise -g." >&5
 echo "$as_me: Overruling autoconf; cl does not recognise -g." >&6;}
     fi ;;
+  * )
+    if test x"$CYGPATH_W" = x ; then
+      CYGPATH_W=echo
+    fi
+    ;;
 esac
 CFLAGS="$save_cflags"
 
@@ -2755,57 +2751,6 @@ if test x"$CFLAGS" = x; then
             coin_warn_cflags="-pedantic-errors $coin_warn_cflags"
             ;;
         esac
-	case $enable_doscompile in
-	  mingw)
-	    CFLAGS="-mno-cygwin"
-	    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-int i=0; i++;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  coin_add_cflags="-mno-cygwin $coin_add_cflags"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	    CFLAGS=
-	  ;;
-	esac
     esac
   fi
   if test -z "$coin_opt_cflags"; then
@@ -2814,14 +2759,24 @@ rm -f conftest.err conftest.$ac_objext \
         case "$CC" in
           clang* ) ;;
           cl* | */cl* | CL* | */CL*)
-            coin_opt_cflags='-MT -O2'
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+              coin_opt_cflags='-MD -O2'
+              coin_dbg_cflags='-MDd'
+            else
+              coin_opt_cflags='-MT -O2'
+              coin_dbg_cflags='-MTd'
+            fi
             coin_add_cflags='-nologo -wd4996 -D_CRT_SECURE_NO_DEPRECATE'
-            coin_dbg_cflags='-MTd'
             ;;
           icl* | */icl* | ICL* | */ICL*)
-            coin_opt_cflags='-MT -Ox'
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+              coin_opt_cflags='-MD -Ox'
+              coin_dbg_cflags='-MDd -debug'
+            else
+              coin_opt_cflags='-MT -Ox'
+              coin_dbg_cflags='-MTd -debug'
+            fi
             coin_add_cflags='-nologo -D_CRT_SECURE_NO_DEPRECATE'
-            coin_dbg_cflags='-MTd -debug'
             ;;
         esac
         ;;
@@ -2996,23 +2951,6 @@ else
   fi
 fi
 
-# If CFLAGS contains -mno-cygwin, CPPFLAGS must also have it.
-
-case "$CFLAGS" in
-  *-mno-cygwin*)
-    if test x${CPPFLAGS+set} != xset ; then
-      CPPFLAGS="-mno-cygwin"
-    else
-      case "$CPPFLAGS" in
-        *-mno-cygwin*)
-	  ;;
-	*)
-	  CPPFLAGS="$CPPFLAGS -mno-cygwin"
-	  ;;
-      esac
-    fi ;;
-esac
-
 # add -DPROJECT_BUILD to signal compiler preprocessor which config header file to include
 if test x$COIN_PRJCT != x; then
   CFLAGS="$CFLAGS -D${COIN_PRJCT}_BUILD"
@@ -3136,21 +3074,7 @@ fi
 case "$CC" in
   clang* ) ;;
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
-    case $build in
-  *-mingw*)
-    if test "${LD+set}" = set; then :; else
-      LD=link
-    fi
-    ;;
- esac
- case $enable_doscompile in
-   msvc)
-     if test "x${LD+set}" = xset; then :; else
-       LD=link
-     fi
-     ;;
- esac
-
+    LD=link
     ;;
 esac
 
@@ -3182,14 +3106,14 @@ save_cxxflags="$CXXFLAGS"
 # For *-*-solaris*, promote Studio/Workshop compiler to front of list.
 case $build in
   *-cygwin* | *-mingw*)
-  	     if test "$enable_doscompile" = msvc ; then
-	       comps="icl cl"
-	     else
-	       comps="g++ cl"
-	     fi ;;
+      if test "$enable_msvc" = yes ; then
+         comps="icl cl g++"
+      else
+         comps="g++ icl cl"
+      fi ;;
   *-*-solaris*)
   	     comps="CC xlC_r aCC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
-  *-darwin*) comps="g++ c++ CC" ;;
+  *-darwin*) comps="clang++ g++ c++ CC" ;;
   *-linux-gnu*)
              comps="g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC xlC_r aCC CC" ;;
           *) comps="xlC_r aCC CC g++ c++ pgCC icpc gpp cxx cc++ cl FCC KCC RCC" ;;
@@ -3626,7 +3550,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 coin_cxx_is_cl=false
 # It seems that we need to cleanup something here for the Windows
 case "$CXX" in
-  clang* ) ;;
+  clang* | */clang*) ;;
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
     sed -e 's/^void exit (int);//' confdefs.h >> confdefs.hh
     mv confdefs.hh confdefs.h
@@ -3655,6 +3579,11 @@ case "$CXX" in
       { echo "$as_me:$LINENO: Overruling autoconf; cl does not recognise -g." >&5
 echo "$as_me: Overruling autoconf; cl does not recognise -g." >&6;}
     fi ;;
+  * )
+    if test x"$CYGPATH_W" = x ; then
+      CYGPATH_W=echo
+    fi
+    ;;
 esac
 CXXFLAGS="$save_cxxflags"
 
@@ -3691,58 +3620,6 @@ if test x"$CXXFLAGS" = x; then
             coin_warn_cxxflags="-pedantic-errors $coin_warn_cxxflags"
             ;;
         esac
-
-        case $enable_doscompile in
-          mingw)
-            CXXFLAGS="-mno-cygwin"
-            cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-int
-main ()
-{
-int i=0; i++;
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  coin_add_cxxflags="-mno-cygwin $coin_add_cxxflags"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-            CXXFLAGS=
-          ;;
-        esac
     esac
   fi
 
@@ -3754,16 +3631,26 @@ rm -f conftest.err conftest.$ac_objext \
         case "$CXX" in
           clang* ) ;;
           cl* | */cl* | CL* | */CL*)
-	    # The MT and MTd options are mutually exclusive
-            coin_opt_cxxflags='-MT -O2'
+            # The MT and MTd options are mutually exclusive
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+               coin_opt_cxxflags='-MD -O2'
+               coin_dbg_cxxflags='-MDd'
+            else
+               coin_opt_cxxflags='-MT -O2'
+               coin_dbg_cxxflags='-MTd'
+            fi
             coin_add_cxxflags='-nologo -EHsc -GR -wd4996 -D_CRT_SECURE_NO_DEPRECATE'
-            coin_dbg_cxxflags='-MTd'
             ;;
           icl* | */icl* | ICL* | */ICL*)
-	    # The MT and MTd options are mutually exclusive
-            coin_opt_cxxflags='-MT -Ox'
+          # The MT and MTd options are mutually exclusive
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+              coin_opt_cxxflags='-MD -Ox'
+              coin_dbg_cxxflags='-MDd -debug'
+            else
+              coin_opt_cxxflags='-MT -Ox'
+              coin_dbg_cxxflags='-MTd -debug'
+            fi
             coin_add_cxxflags='-nologo -EHsc -GR -D_CRT_SECURE_NO_DEPRECATE'
-            coin_dbg_cxxflags='-MTd -debug'
             ;;
         esac
         ;;
@@ -3944,23 +3831,6 @@ else
   fi
 fi
 
-# If CXXFLAGS contains -mno-cygwin, CPPFLAGS must also have it.
-
-case "$CXXFLAGS" in
-  *-mno-cygwin*)
-    if test x${CPPFLAGS+set} != xset ; then
-      CPPFLAGS="-mno-cygwin"
-    else
-      case "$CPPFLAGS" in
-        *-mno-cygwin*)
-	  ;;
-	*)
-	  CPPFLAGS="$CPPFLAGS -mno-cygwin"
-	  ;;
-      esac
-    fi ;;
-esac
-
 # add -DPROJECT_BUILD to signal compiler preprocessor which config header file to include
 if test x$COIN_PRJCT != x; then
   CXXFLAGS="$CXXFLAGS -D${COIN_PRJCT}_BUILD"
@@ -4080,25 +3950,11 @@ echo "$as_me: Will use MPI C++ compiler $MPICXX" >&6;}
   CXX="$MPICXX"
 fi
 
-# correct the LD variable in a mingw build with MS or intel compiler
+# correct the LD variable in a build with MS or Intel-windows compiler
 case "$CXX" in
   clang* ) ;;
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
-    case $build in
-  *-mingw*)
-    if test "${LD+set}" = set; then :; else
-      LD=link
-    fi
-    ;;
- esac
- case $enable_doscompile in
-   msvc)
-     if test "x${LD+set}" = xset; then :; else
-       LD=link
-     fi
-     ;;
- esac
-
+    LD=link
     ;;
 esac
 
@@ -4115,8 +3971,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # it will helpfully set FFLAGS to an incorrect value.
 case $build in
   *-cygwin* | *-mingw*)
-     if test "$enable_doscompile" = msvc ; then
-       coin_f77_comps="ifort fl32 compile_f2c"
+     if test "$enable_msvc" = yes ; then
+       coin_f77_comps="ifort fl32 compile_f2c gfortran g95 g77"
      else
        coin_f77_comps="gfortran ifort g95 g77 fl32 compile_f2c"
      fi ;;
@@ -4220,7 +4076,6 @@ fi
 
 
 if test "$F77" != unavailable ; then
-
 
 
 
@@ -4434,7 +4289,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4437:" \
+echo "$as_me:4292:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -4603,60 +4458,29 @@ if test "$F77" != "unavailable" && test x"$FFLAGS" = x ; then
     coin_opt_fflags="-O3"
     coin_add_fflags="-pipe"
     coin_dbg_fflags="-g -O0"
-    case $enable_doscompile in
-      mingw)
-	FFLAGS="-mno-cygwin"
-	cat >conftest.$ac_ext <<_ACEOF
-      program main
-      write(*,*) 'Hello world'
-      end
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_f77_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  coin_add_fflags="-mno-cygwin $coin_add_fflags"
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	FFLAGS=
-      ;;
-    esac
   else
     case $build in
       *-cygwin* | *-mingw*)
         case $F77 in
           ifort* | */ifort* | IFORT* | */IFORT* )
-            coin_opt_fflags='-MT -O3'
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+              coin_opt_fflags='-MD -O3'
+              coin_dbg_fflags='-MDd -debug'
+            else
+              coin_opt_fflags='-MT -O3'
+              coin_dbg_fflags='-MTd -debug'
+            fi
             coin_add_fflags='-fpp -nologo'
-            coin_dbg_fflags='-MTd -debug'
           ;;
           compile_f2c*)
-            coin_opt_fflags='-MT -O2'
+            if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+              coin_opt_fflags='-MD -O2'
+              coin_dbg_fflags='-MDd'
+            else
+              coin_opt_fflags='-MT -O2'
+              coin_dbg_fflags='-MTd'
+            fi
             coin_add_fflags='-nologo -wd4996'
-            coin_dbg_fflags='-MTd'
           ;;
         esac
         ;;
@@ -4811,22 +4635,6 @@ else
   fi
 fi
 
-# If FFLAGS contains -mno-cygwin, CPPFLAGS must have it.
-case "$FFLAGS" in
-  *-mno-cygwin*)
-    if test x${CPPFLAGS+set} != xset ; then
-      CPPFLAGS="-mno-cygwin"
-    else
-      case "$CPPFLAGS" in
-        *-mno-cygwin*)
-	  ;;
-	*)
-	  CPPFLAGS="$CPPFLAGS -mno-cygwin"
-	  ;;
-      esac
-    fi ;;
-esac
-
 # Try if FFLAGS works
 if test "$F77" != "unavailable" ; then
   cat >conftest.$ac_ext <<_ACEOF
@@ -4923,24 +4731,14 @@ echo "$as_me: Will use MPI Fortran compiler $MPIF77" >&6;}
 fi
 
 # correct the LD variable if we use the intel fortran compiler in windows
-case "$F77" in
-  ifort* | */ifort* | IFORT* | */IFORT*)
-    case $build in
-  *-mingw*)
-    if test "${LD+set}" = set; then :; else
-      LD=link
-    fi
-    ;;
- esac
- case $enable_doscompile in
-   msvc)
-     if test "x${LD+set}" = xset; then :; else
-       LD=link
-     fi
-     ;;
- esac
-
-    ;;
+case $build in
+  *-cygwin* | *-mingw*)
+    case "$F77" in
+      ifort* | */ifort* | IFORT* | */IFORT*)
+        LD=link
+      ;;
+    esac
+  ;;
 esac
 
 ac_ext=c
@@ -5003,7 +4801,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5006: \"$ac_link\") >&5
+(eval echo $as_me:4804: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5081,7 +4879,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5084: \"$ac_link\") >&5
+(eval echo $as_me:4882: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5266,6 +5064,7 @@ else
       case $flag in
         -lcrt*.o) ;;
         -lcygwin) ;;
+        -lgcc*)   ;;
                *) my_flibs="$my_flibs $flag" ;;
       esac
     done
@@ -5846,6 +5645,7 @@ fi
 
 # START
 
+coin_disable_shared=no
 # Test if force_shared has been set
 if test "x" = xforce_shared; then
   if test x$enable_shared = xno; then
@@ -5855,32 +5655,50 @@ echo "$as_me: error: Shared libraries are disabled by user, but this is not feas
   fi
   enable_shared=yes;
 else
-  # On Cygwin and AIX, building DLLs doesn't work
   case $build in
-    *-cygwin*)
+    *-cygwin* | *-mingw*)
       coin_disable_shared=yes
-      platform=Cygwin
+      if test x"$enable_shared" = xyes; then
+        case "$CC" in
+          clang* )
+            { echo "$as_me:$LINENO: WARNING: Building of DLLs not supported in this configuration." >&5
+echo "$as_me: WARNING: Building of DLLs not supported in this configuration." >&2;}
+            ;;
+          cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+            { echo "$as_me:$LINENO: Building of DLLs not supported in this configuration." >&5
+echo "$as_me: Building of DLLs not supported in this configuration." >&6;}
+            ;;
+          *gcc*)
+            if test x"$enable_dependency_linking" = xyes; then
+              coin_disable_shared=no
+            else
+              { echo "$as_me:$LINENO: WARNING: Dependency linking seems to be disabled, so shared libraries (DLLs) will not be built" >&5
+echo "$as_me: WARNING: Dependency linking seems to be disabled, so shared libraries (DLLs) will not be built" >&2;}
+            fi
+            ;;
+          *)
+            { echo "$as_me:$LINENO: WARNING: Building of DLLs not supported in this configuration." >&5
+echo "$as_me: WARNING: Building of DLLs not supported in this configuration." >&2;}
+            ;;
+        esac
+      fi
     ;;
     *-aix*)
       coin_disable_shared=yes
       platform=AIX
-    ;;
-    *-mingw*)
-      coin_disable_shared=yes
-      platform="Msys"
-#      case "$CXX" in
-#        cl*)
-#          coin_disable_shared=yes
-#          platform="Msys with cl"
-#      ;;
-#      esac
+      if test x"$enable_shared" = xyes; then
+        { echo "$as_me:$LINENO: WARNING: Shared objects are not supported." >&5
+echo "$as_me: WARNING: Shared objects are not supported." >&2;}
+      fi
     ;;
   esac
 fi
 if test x"$coin_disable_shared" = xyes; then
   if test x"$enable_shared" = xyes; then
-    { echo "$as_me:$LINENO: WARNING: On $platform, shared objects are not supported. I'm disabling your choice." >&5
-echo "$as_me: WARNING: On $platform, shared objects are not supported. I'm disabling your choice." >&2;}
+    :
+  else
+    # we don't disable shared, because it was not selected anyway
+    coin_disable_shared=no
   fi
   enable_shared=no
 fi
@@ -7036,12 +6854,12 @@ fi
 
 
 LIBTOOL=
-if test -r ../libtool; then
+if test -f ../libtool; then
   coin_config_dir=..
   LIBTOOL='$(SHELL) $(top_builddir)/../libtool'
 fi
 if test "x$LIBTOOL" = x; then
-  if test -r ../../libtool; then
+  if test -f ../../libtool; then
     coin_config_dir=../..
     LIBTOOL='$(SHELL) $(top_builddir)/../../libtool'
   fi
@@ -7587,7 +7405,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7590 "configure"' > conftest.$ac_ext
+  echo '#line 7408 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9567,11 +9385,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9570: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9388: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9574: \$? = $ac_status" >&5
+   echo "$as_me:9392: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9835,11 +9653,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9838: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9656: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9842: \$? = $ac_status" >&5
+   echo "$as_me:9660: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9939,11 +9757,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9942: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9760: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9946: \$? = $ac_status" >&5
+   echo "$as_me:9764: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12356,7 +12174,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12359 "configure"
+#line 12177 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12456,7 +12274,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12459 "configure"
+#line 12277 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14816,11 +14634,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14819: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14637: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14823: \$? = $ac_status" >&5
+   echo "$as_me:14641: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14920,11 +14738,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14923: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14741: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14927: \$? = $ac_status" >&5
+   echo "$as_me:14745: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16490,11 +16308,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16493: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16311: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16497: \$? = $ac_status" >&5
+   echo "$as_me:16315: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16594,11 +16412,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16597: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16415: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16601: \$? = $ac_status" >&5
+   echo "$as_me:16419: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18801,11 +18619,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18804: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18622: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18808: \$? = $ac_status" >&5
+   echo "$as_me:18626: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19069,11 +18887,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19072: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18890: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19076: \$? = $ac_status" >&5
+   echo "$as_me:18894: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19173,11 +18991,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19176: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18994: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19180: \$? = $ac_status" >&5
+   echo "$as_me:18998: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21888,6 +21706,46 @@ echo "$as_me: Build is \"$build\"." >&6;}
   case $build in
     # Here we need to check if -m32 is specified.  If so, we need to correct
     # sys_lib_search_path_spec
+    *-cygwin* | *-mingw*)
+       case "$CXX" in
+    clang* )
+      # we assume that libtool patches for CLANG are the same as for GNU compiler - correct???
+      { echo "$as_me:$LINENO: Applying patches to libtool for CLANG compiler" >&5
+echo "$as_me: Applying patches to libtool for CLANG compiler" >&6;}
+      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
+	  -e 's|libext="lib"|libext="a"|' \
+      libtool > conftest.bla
+      ;;
+    cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+      { echo "$as_me:$LINENO: Applying patches to libtool for cl compiler" >&5
+echo "$as_me: Applying patches to libtool for cl compiler" >&6;}
+      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's|fix_srcfile_path=\"\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's%compile_deplibs=\"\$dir/\$old_library \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$old_library | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
+	  -e 's%compile_deplibs=\"\$dir/\$linklib \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$linklib | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
+	  -e 's%lib /OUT:%lib -OUT:%' \
+	  -e "s%cygpath -w%$CYGPATH_W%" \
+	  -e 's%$AR x \\$f_ex_an_ar_oldlib%bla=\\$(lib -nologo -list \\$('"$CYGPATH_W \$1"') '"$mydos2unix"' | xargs echo); echo \\$bla; for i in \\$bla; do lib -nologo -extract:\\$i \\$('"$CYGPATH_W \$1"'); done%' \
+	  -e 's%$AR t "$f_ex_an_ar_oldlib"%lib -nologo -list \$('"$CYGPATH_W \$1"') '"$mydos2unix"'%' \
+	  -e 's%f_ex_an_ar_oldlib="\($?*1*\)"%f_ex_an_ar_oldlib='\`"$CYGPATH_W"' \1`%' \
+	  -e 's%^archive_cmds=.*%archive_cmds="\\$CC -o \\$lib \\$libobjs \\$compiler_flags \\\\\\`echo \\\\\\"\\$deplibs\\\\\\" | \\$SED -e '"\'"'s/ -lc\\$//'"\'"'\\\\\\` -link -dll~linknames="%' \
+	  -e 's%old_archive_cmds="lib -OUT:\\$oldlib\\$oldobjs\\$old_deplibs"%old_archive_cmds="if test -r \\$oldlib; then bla=\\"\\$oldlib\\"; else bla=; fi; lib -OUT:\\$oldlib \\\\\\$bla\\$oldobjs\\$old_deplibs"%' \
+      libtool > conftest.bla
+      ;;
+    *)
+      { echo "$as_me:$LINENO: Applying patches to libtool for GNU compiler" >&5
+echo "$as_me: Applying patches to libtool for GNU compiler" >&6;}
+      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+	  -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
+	  -e 's|libext="lib"|libext="a"|' \
+      libtool > conftest.bla
+      ;;
+  esac
+  mv conftest.bla libtool
+  chmod 755 libtool
+
+      ;;
     *x86_64-*)
       if test "$GCC" = yes && (echo $CXXFLAGS $CFLAGS $FFLAGS | $EGREP 'm32' >& /dev/null); then
         { echo "$as_me:$LINENO: Applying patches to libtool for 32bit compilation" >&5
@@ -21927,46 +21785,6 @@ echo "$as_me: Applying patches to libtool for 64-bit GCC compilation" >&6;}
   fi
       ;;
     # Cygwin. Ah, cygwin. Too big and ugly to inline; see the macro.
-    *-cygwin* | *-mingw*)
-       case "$CXX" in
-    clang* )
-      # we assume that libtool patches for CLANG are the same as for GNU compiler - correct???
-      { echo "$as_me:$LINENO: Applying patches to libtool for CLANG compiler" >&5
-echo "$as_me: Applying patches to libtool for CLANG compiler" >&6;}
-      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-	  -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
-	  -e 's|libext="lib"|libext="a"|' \
-      libtool > conftest.bla
-      ;;
-    cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
-      { echo "$as_me:$LINENO: Applying patches to libtool for cl compiler" >&5
-echo "$as_me: Applying patches to libtool for cl compiler" >&6;}
-      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-	  -e 's|fix_srcfile_path=\"\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-	  -e 's%compile_deplibs=\"\$dir/\$old_library \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$old_library | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
-	  -e 's%compile_deplibs=\"\$dir/\$linklib \$compile_deplibs\"%compile_deplibs="'\`"$CYGPATH_W"' \$dir/\$linklib | sed -e '"'"'sY\\\\\\\\Y/Yg'"'"\`' \$compile_deplibs\"'% \
-	  -e 's%lib /OUT:%lib -OUT:%' \
-	  -e "s%cygpath -w%$CYGPATH_W%" \
-	  -e 's%$AR x \\$f_ex_an_ar_oldlib%bla=\\`lib -nologo -list \\$f_ex_an_ar_oldlib | xargs echo '"$mydos2unix"'\\`; echo \\$bla; for i in \\$bla; do lib -nologo -extract:\\$i \\$f_ex_an_ar_oldlib; done%' \
-	  -e 's/$AR t/lib -nologo -list/' \
-	  -e 's%f_ex_an_ar_oldlib="\($?*1*\)"%f_ex_an_ar_oldlib='\`"$CYGPATH_W"' \1`%' \
-	  -e 's%^archive_cmds=.*%archive_cmds="\\$CC -o \\$lib \\$libobjs \\$compiler_flags \\\\\\`echo \\\\\\"\\$deplibs\\\\\\" | \\$SED -e '"\'"'s/ -lc\\$//'"\'"'\\\\\\` -link -dll~linknames="%' \
-	  -e 's%old_archive_cmds="lib -OUT:\\$oldlib\\$oldobjs\\$old_deplibs"%old_archive_cmds="if test -r \\$oldlib; then bla=\\"\\$oldlib\\"; else bla=; fi; lib -OUT:\\$oldlib \\\\\\$bla\\$oldobjs\\$old_deplibs"%' \
-      libtool > conftest.bla
-      ;;
-    *)
-      { echo "$as_me:$LINENO: Applying patches to libtool for GNU compiler" >&5
-echo "$as_me: Applying patches to libtool for GNU compiler" >&6;}
-      sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
-	  -e 's|"lib /OUT:\\$oldlib\\$oldobjs\\$old_deplibs"|"\\$AR \\$AR_FLAGS \\$oldlib\\$oldobjs\\$old_deplibs~\\$RANLIB \\$oldlib"|' \
-	  -e 's|libext="lib"|libext="a"|' \
-      libtool > conftest.bla
-      ;;
-  esac
-  mv conftest.bla libtool
-  chmod 755 libtool
-
-      ;;
     *-darwin*)
       { echo "$as_me:$LINENO: Applying patches to libtool for Darwin" >&5
 echo "$as_me: Applying patches to libtool for Darwin" >&6;}
@@ -22074,11 +21892,59 @@ fi
 
 # AC_MSG_NOTICE([End of INIT_AUTO_TOOLS.])
 
-# ToDo
-# For now, don't use the -no-undefined flag, since the Makefiles are
-# not yet set up that way.  But we need to fix this, when we want
-# to comile DLLs under Windows.
-LT_LDFLAGS=
+# Check whether --enable-dependency-linking or --disable-dependency-linking was given.
+if test "${enable_dependency_linking+set}" = set; then
+  enableval="$enable_dependency_linking"
+  dependency_linking="$enableval"
+else
+  dependency_linking=auto
+fi;
+
+if test "$dependency_linking" = auto; then
+  # On Cygwin and AIX, building DLLs doesn't work
+  dependency_linking=no
+  if test x"$coin_disable_shared" = xno; then
+    case $build in
+      *-cygwin* | *-mingw*)
+        case "$CC" in
+          clang* )
+            dependency_linking=yes
+            ;;
+          cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+            dependency_linking=no
+            ;;
+          *gcc*)
+            dependency_linking=yes
+            ;;
+          *)
+            dependency_linking=yes
+            ;;
+        esac
+        ;;
+      *)
+        dependency_linking=yes
+        ;;
+    esac
+  fi
+fi
+
+if test "$dependency_linking" = yes ;
+then
+  LT_LDFLAGS="-no-undefined"
+else
+  LT_LDFLAGS=
+fi
+
+
+
+if test "$dependency_linking" = yes; then
+  DEPENDENCY_LINKING_TRUE=
+  DEPENDENCY_LINKING_FALSE='#'
+else
+  DEPENDENCY_LINKING_TRUE='#'
+  DEPENDENCY_LINKING_FALSE=
+fi
+
 
 # Check if we want to set the library version
 echo "$as_me:$LINENO: checking if library version is set" >&5
@@ -24223,7 +24089,7 @@ fi
 
 echo Creating copies in branchCutPrice ...
 cmd="cp"
-if test -e $srcdir/branchCutPrice/examplefiles.txt ; then
+if test -r $srcdir/branchCutPrice/examplefiles.txt ; then
   my_target_dir="branchCutPrice"
   my_link_files=`cat $srcdir/branchCutPrice/examplefiles.txt`
   my_dirname=`(dirname branchCutPrice/examplefiles.txt) 2>/dev/null ||
@@ -24256,7 +24122,7 @@ echo X$my_target_dir/$i |
   	  /^X\(\/\/\)$/{ s//\1/; q; }
   	  /^X\(\/\).*/{ s//\1/; q; }
   	  s/.*/./; q'`
-      if test -e $dirn2; then : ; else
+      if test -d $dirn2; then : ; else
         { if $as_mkdir_p; then
     mkdir -p $dirn2
   else
@@ -24309,10 +24175,12 @@ fi
 ##############################################################################
 #### EXAMPLE DATA FILES
 
+#### AMPL FILES
+
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/CoinOS.opt"
+  cvl_tmp="data/amplFiles/bonminEx1.nl"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24322,7 +24190,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/CppADTestLag.osil"
+  cvl_tmp="data/amplFiles/eastborne.mod"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24332,7 +24200,21 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/bonminEx1.nl"
+  cvl_tmp="data/amplFiles/eastborne.nl"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+##### CONFIG FILES
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/configFiles/kill.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24342,7 +24224,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/eastborne.gms"
+  cvl_tmp="data/configFiles/testLocal.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24352,7 +24234,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/eastborne.mod"
+  cvl_tmp="data/configFiles/testcalclp.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24362,7 +24244,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/eastborne.nl"
+  cvl_tmp="data/configFiles/testRemote.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24372,7 +24254,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/eastborne.osil"
+  cvl_tmp="data/configFiles/testRemoteKnock.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24382,7 +24264,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/knock.ospl"
+  cvl_tmp="data/configFiles/testRemoteRetrieve.config"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24392,7 +24274,19 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/nonconvex.osil"
+  cvl_tmp="data/configFiles/testRemoteSend.config"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+##### DIP FILES
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/dipFiles/spl1.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24402,7 +24296,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/p0033.osil"
+  cvl_tmp="data/dipFiles/spl2.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24412,7 +24306,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/parinc.mps"
+  cvl_tmp="data/dipFiles/spl3.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24422,7 +24316,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/parincLinear.osil"
+  cvl_tmp="data/dipFiles/genAssign.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24432,7 +24326,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/parincQuadratic.osil"
+  cvl_tmp="data/dipFiles/smallIPBook.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24442,7 +24336,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/rosenbrockmod.osil"
+  cvl_tmp="data/dipFiles/spl1.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24452,7 +24346,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/sendWithJobID.osol"
+  cvl_tmp="data/dipFiles/spl1-b.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24462,18 +24356,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/wayneQuadratic.osil"
-  for file in $cvl_tmp ; do
-    coin_vpath_link_files="$coin_vpath_link_files $file"
-  done
-fi
-
-
-
-
-# Allow for newlines in the parameter
-if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl1.osil"
+  cvl_tmp="data/dipFiles/spl2.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24483,7 +24366,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl2.osil"
+  cvl_tmp="data/dipFiles/spl3.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24493,7 +24376,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl3.osil"
+  cvl_tmp="data/dipFiles/spl2-b.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24503,7 +24386,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/genAssign.osil"
+  cvl_tmp="data/dipFiles/genAssign.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24513,28 +24396,19 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/smallIPBook.osil"
+  cvl_tmp="data/dipFiles/smallIPBook.osol"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
 fi
 
 
+#####GAMS Files
 
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl1.osol"
-  for file in $cvl_tmp ; do
-    coin_vpath_link_files="$coin_vpath_link_files $file"
-  done
-fi
-
-
-
-# Allow for newlines in the parameter
-if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl1-b.osol"
+  cvl_tmp="data/gamsFiles/eastborne.gms"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24544,7 +24418,43 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl2.osol"
+  cvl_tmp="data/gamsFiles/CoinOS.opt"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+#####MATLAB Files
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/matlabFiles/osdip.parm"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+#####MPS FILES
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/mpsFiles/parinc.mps"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+##### OSIL FILES
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osilFiles/CppADTestLag.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24554,7 +24464,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl3.osol"
+  cvl_tmp="data/osilFiles/eastborne.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24564,7 +24474,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/spl2-b.osol"
+  cvl_tmp="data/osilFiles/nonconvex.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24574,7 +24484,7 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/genAssign.osol"
+  cvl_tmp="data/osilFiles/p0033.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
@@ -24584,11 +24494,156 @@ fi
 
 # Allow for newlines in the parameter
 if test $coin_vpath_config = yes; then
-  cvl_tmp="data/smallIPBook.osol"
+  cvl_tmp="data/osilFiles/parincLinear.osil"
   for file in $cvl_tmp ; do
     coin_vpath_link_files="$coin_vpath_link_files $file"
   done
 fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osilFiles/parincQuadratic.osil"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osilFiles/rosenbrockmod.osil"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osilFiles/wayneQuadratic.osil"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+##### OSOL FILES
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/kill.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/parsertest.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/remoteSolve1.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/remoteSolve2.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/retrieve.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/sendWithJobID.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osolFiles/solveroptions.osol"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+##### OSPL FILES
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osplFiles/knock.ospl"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osplFiles/demo.ospl"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+# Allow for newlines in the parameter
+if test $coin_vpath_config = yes; then
+  cvl_tmp="data/osplFiles/result.ospl"
+  for file in $cvl_tmp ; do
+    coin_vpath_link_files="$coin_vpath_link_files $file"
+  done
+fi
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -24907,9 +24962,6 @@ fi
 echo "$as_me:$LINENO: checking which command should be used to link input files" >&5
 echo $ECHO_N "checking which command should be used to link input files... $ECHO_C" >&6
 coin_link_input_cmd="$LN_S"
-if test "$enable_doscompile" = mingw; then
-  coin_link_input_cmd=cp
-fi
 case "$CC" in
   clang* ) ;;
   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
@@ -25140,6 +25192,13 @@ if test -z "${HAVE_EXTERNALS_TRUE}" && test -z "${HAVE_EXTERNALS_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"HAVE_EXTERNALS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"HAVE_EXTERNALS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${DEPENDENCY_LINKING_TRUE}" && test -z "${DEPENDENCY_LINKING_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"DEPENDENCY_LINKING\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"DEPENDENCY_LINKING\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -25792,6 +25851,8 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@ac_c_preproc_warn_flag@,$ac_c_preproc_warn_flag,;t t
 s,@ac_cxx_preproc_warn_flag@,$ac_cxx_preproc_warn_flag,;t t
 s,@RPATH_FLAGS@,$RPATH_FLAGS,;t t
+s,@DEPENDENCY_LINKING_TRUE@,$DEPENDENCY_LINKING_TRUE,;t t
+s,@DEPENDENCY_LINKING_FALSE@,$DEPENDENCY_LINKING_FALSE,;t t
 s,@LT_LDFLAGS@,$LT_LDFLAGS,;t t
 s,@MSCL__TRUE@,$MSCL__TRUE,;t t
 s,@MSCL__FALSE@,$MSCL__FALSE,;t t

@@ -79,8 +79,8 @@ void OS_tm::readInput(const char* filename){
 	try{
 		// get the parincLinear problem
 		std::string osilFileName;
-		//osilFileName =  dataDir  +   "parincLinear.osil";
-		osilFileName =  dataDir + "p0033.osil";
+		//osilFileName =  dataDir  +  "osilFiles" + dirsep + "parincLinear.osil";
+		osilFileName =  dataDir  +  "osilFiles" + dirsep + "p0033.osil";
 		std::cout << "Try to read a sample file" << std::endl;
 		std::cout << "The file is: " << osilFileName << std::endl <<std::endl ;
 		std::string osil = fileUtil->getFileAsString( osilFileName.c_str() );
