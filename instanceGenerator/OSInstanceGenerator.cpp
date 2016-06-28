@@ -1,10 +1,10 @@
 /* $Id: OSInstanceGenerator.cpp 2698 2009-06-09 04:14:07Z kmartin $ */
 /** @file OSInstanceGenerator.cpp
  * 
- * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin, 
+ * @author  Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin
  *
  * \remarks
- * Copyright (C) 2005-2011, Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin,
+ * Copyright (C) 2005-2015, Robert Fourer, Horand Gassmann, Jun Ma, Kipp Martin,
  * Northwestern University, and the University of Chicago.
  * All Rights Reserved.
  * This software is licensed under the Eclipse Public License. 
@@ -14,21 +14,22 @@
  * to generate an OSiL problem instance.
  * 
  * The objective of this example is to illustrate how to build a problem instance
- * using the OSIntance class API. In particular we illutrate a number of the set()
+ * using the OSIntance class API. In particular we illustrate a number of the set()
  * methods in the OSInstance class. As written, we need the LINDO nonlinear solver.
  *
  * <b>Model:</b> A nonlinear model with multiple local minimizers.
- * Taken from the Samples directory of the LINDO API
+ * Adapted from the Samples directory of the LINDO API
  *
  *           maximize  abs( x0 + 1) + .4 * x1;  <br />
- *           s.t.     x0           + x1       <= 4; <br />
- *                    x0 * x1      + x1       <= 6; <br />
- *                    x0 * x1                    <= 0; <br />
- *                    max(x1 + 1, x0)           >= 0; <br />
- *                    if(x1, 1, x1)              <= 0; <br />
- *                    (x1 * 2 * x1  -  x1) * x0  <= 0; <br />
- *                    -100  <=  x0  <=  100 <br />
- *                    x1 is binary <br />
+ *           s.t.      x0           + x1            <= 4; <br />
+ *                     x1 * x2      + ln(x2)        <= 6; <br />
+ *                     x0 * x1                      <= 0; <br />
+ *                     max(x1 + 1, x0)              >= 0; <br />
+ *                     if(x1, 1, x1)                <= 0; <br />
+ *                     (x1 * 2 * x1  -  x1) * x0    <= 0; <br />
+ *                     -100  <=  x0  <=  100              <br />
+ *                     x1 is binary                       <br />
+ *                     5 <= x2 <= 10; x2 is integer       <br />
  */
 
 #include<iostream>
@@ -43,14 +44,9 @@
 #include "OSErrorClass.h"
 
 
-
- 
-
-
- 
-
 using std::cout;
 using std::endl;
+
 int  main(){	
 	WindowsErrorPopupBlocker();
 	cout << "Start Building the Model" << endl;
@@ -65,11 +61,13 @@ int  main(){
 		// now put in the OSInstance <instanceData> information
 		// 
 		// first the variables
-		osinstance->setVariableNumber( 2);   
+		osinstance->setVariableNumber( 3);   
 		//addVariable(int index, string name, double lowerBound, double upperBound, char type, double init, string initString);
 		// we could use setVariables() and add all the variable with one method call -- below is easier
+
 		osinstance->addVariable(0, "x0", -100, 100, 'C');
 		osinstance->addVariable(1, "x1", 0, 1, 'B');
+		osinstance->addVariable(2, "x2", 5, 10, 'I');
 		//
 		// now add the objective function
 		osinstance->setObjectiveNumber( 1);
@@ -118,21 +116,26 @@ int  main(){
 		// finally the nonlinear part, not as nice since we don't have any set() methods
 		// yet, we must work directly with the data structures
 		//
-		// we have 6 nonlinear expressions
-		osinstance->instanceData->nonlinearExpressions->numberOfNonlinearExpressions = 6;
-		osinstance->instanceData->nonlinearExpressions->nl = new Nl*[ 6 ];
+		// we use 7 nonlinear expressions
+                // note that constraint 2 contains two expressions 
+                // that we choose to model separately. 
+                // They will be added together by the system.
+
+                osinstance->instanceData->nonlinearExpressions = new NonlinearExpressions();
+		osinstance->instanceData->nonlinearExpressions->numberOfNonlinearExpressions = 7;
+		osinstance->instanceData->nonlinearExpressions->nl = new Nl*[ 7 ];
 		// define the vectors
 		OSnLNode *nlNodePoint;
 		OSnLNodeVariable *nlNodeVariablePoint;
 		OSnLNodeNumber *nlNodeNumberPoint;
 		OSnLNodeMax *nlNodeMaxPoint;
-		std::vector<OSnLNode*> nlNodeVec;
+		std::vector<ExprNode*> nlNodeVec;
 		//
 		//
 		// the objective function nonlinear term abs( x0 + 1)
 		osinstance->instanceData->nonlinearExpressions->nl[ 0] = new Nl();
 		osinstance->instanceData->nonlinearExpressions->nl[ 0]->idx = -1;
-		osinstance->instanceData->nonlinearExpressions->nl[ 0]->osExpressionTree = new OSExpressionTree();
+		osinstance->instanceData->nonlinearExpressions->nl[ 0]->osExpressionTree = new ScalarExpressionTree();
 		// create a variable nl node for x0
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=0;
@@ -150,23 +153,23 @@ int  main(){
 		// the vectors are in postfix format
 		// now the expression tree
 		osinstance->instanceData->nonlinearExpressions->nl[ 0]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		//
 		//
 		// constraint 0 has no nonlinear terms
-		// generate the x0*x1 term in constraint 1
+		// generate the x1*x2 term in constraint 1
 		//
 		osinstance->instanceData->nonlinearExpressions->nl[ 1] = new Nl();
 		osinstance->instanceData->nonlinearExpressions->nl[ 1]->idx = 1;
-		osinstance->instanceData->nonlinearExpressions->nl[ 1]->osExpressionTree = new OSExpressionTree();
-		// create a variable nl node for x0
-		nlNodeVariablePoint = new OSnLNodeVariable();
-		nlNodeVariablePoint->idx=0;
-		nlNodeVec.push_back( nlNodeVariablePoint);
-		// create the nl node for x1
+		osinstance->instanceData->nonlinearExpressions->nl[ 1]->osExpressionTree = new ScalarExpressionTree();
+		// create a variable nl node for x1
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=1;
+		nlNodeVec.push_back( nlNodeVariablePoint);
+		// create the nl node for x2
+		nlNodeVariablePoint = new OSnLNodeVariable();
+		nlNodeVariablePoint->idx=2;
 		nlNodeVec.push_back( nlNodeVariablePoint);
 		// create the nl node for *
 		nlNodePoint = new OSnLNodeTimes();
@@ -174,14 +177,34 @@ int  main(){
 		// the vectors are in postfix format
 		// now the expression tree
 		osinstance->instanceData->nonlinearExpressions->nl[ 1]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		// 
 		//
-		// generate the x0*x1 term in constraint 2
+                // generate the second term in constraint 1, ln(x2)
 		osinstance->instanceData->nonlinearExpressions->nl[ 2] = new Nl();
-		osinstance->instanceData->nonlinearExpressions->nl[ 2]->idx = 2;
-		osinstance->instanceData->nonlinearExpressions->nl[ 2]->osExpressionTree = new OSExpressionTree();
+		osinstance->instanceData->nonlinearExpressions->nl[ 2]->idx = 1;
+		osinstance->instanceData->nonlinearExpressions->nl[ 2]->osExpressionTree = new ScalarExpressionTree();
+		// create a variable nl node for x2
+		nlNodeVariablePoint = new OSnLNodeVariable();
+		nlNodeVariablePoint->idx=2;
+		nlNodeVec.push_back( nlNodeVariablePoint);
+		// create the nl node for ln
+		nlNodePoint = new OSnLNodeLn();
+		nlNodeVec.push_back( nlNodePoint);
+		// the vectors are in postfix format
+		// now the expression tree
+		osinstance->instanceData->nonlinearExpressions->nl[ 2]->osExpressionTree->m_treeRoot =
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
+		nlNodeVec.clear();
+		// 
+		//
+
+
+		// generate the x0*x1 term in constraint 2
+		osinstance->instanceData->nonlinearExpressions->nl[ 3] = new Nl();
+		osinstance->instanceData->nonlinearExpressions->nl[ 3]->idx = 2;
+		osinstance->instanceData->nonlinearExpressions->nl[ 3]->osExpressionTree = new ScalarExpressionTree();
 		// create a variable nl node for x0
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=0;
@@ -195,16 +218,16 @@ int  main(){
 		nlNodeVec.push_back( nlNodePoint);
 		// the vectors are in postfix format
 		// now the expression tree
-		osinstance->instanceData->nonlinearExpressions->nl[ 2]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+		osinstance->instanceData->nonlinearExpressions->nl[ 3]->osExpressionTree->m_treeRoot =
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		//
 		//
 		//
 		// generate the max(x0 , x1 + 1) term in constraint 3
-		osinstance->instanceData->nonlinearExpressions->nl[ 3] = new Nl();
-		osinstance->instanceData->nonlinearExpressions->nl[ 3]->idx = 3;
-		osinstance->instanceData->nonlinearExpressions->nl[ 3]->osExpressionTree = new OSExpressionTree();
+		osinstance->instanceData->nonlinearExpressions->nl[ 4] = new Nl();
+		osinstance->instanceData->nonlinearExpressions->nl[ 4]->idx = 3;
+		osinstance->instanceData->nonlinearExpressions->nl[ 4]->osExpressionTree = new ScalarExpressionTree();
 		// create a variable nl node for x1
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=1;
@@ -227,16 +250,16 @@ int  main(){
 		nlNodeVec.push_back( nlNodeMaxPoint);
 		// the vectors are in postfix format
 		// now the expression tree
-		osinstance->instanceData->nonlinearExpressions->nl[ 3]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+		osinstance->instanceData->nonlinearExpressions->nl[ 4]->osExpressionTree->m_treeRoot =
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		//
 		//
 		//
 		// generate the if(x1, 1, x1) term in constraint 4
-		osinstance->instanceData->nonlinearExpressions->nl[ 4] = new Nl();
-		osinstance->instanceData->nonlinearExpressions->nl[ 4]->idx = 4;
-		osinstance->instanceData->nonlinearExpressions->nl[ 4]->osExpressionTree = new OSExpressionTree();
+		osinstance->instanceData->nonlinearExpressions->nl[ 5] = new Nl();
+		osinstance->instanceData->nonlinearExpressions->nl[ 5]->idx = 4;
+		osinstance->instanceData->nonlinearExpressions->nl[ 5]->osExpressionTree = new ScalarExpressionTree();
 		// create a variable nl node for x1
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=1;
@@ -254,16 +277,16 @@ int  main(){
 		nlNodeVec.push_back( nlNodePoint);
 		// the vectors are in postfix format
 		// now the expression tree
-		osinstance->instanceData->nonlinearExpressions->nl[ 4]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+		osinstance->instanceData->nonlinearExpressions->nl[ 5]->osExpressionTree->m_treeRoot =
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		//
 		//
 		//
 		// generate the (x1 * 2 * x1  -  x1) * x0 term in constraint 5
-		osinstance->instanceData->nonlinearExpressions->nl[ 5] = new Nl();
-		osinstance->instanceData->nonlinearExpressions->nl[ 5]->idx = 5;
-		osinstance->instanceData->nonlinearExpressions->nl[ 5]->osExpressionTree = new OSExpressionTree();
+		osinstance->instanceData->nonlinearExpressions->nl[ 6] = new Nl();
+		osinstance->instanceData->nonlinearExpressions->nl[ 6]->idx = 5;
+		osinstance->instanceData->nonlinearExpressions->nl[ 6]->osExpressionTree = new ScalarExpressionTree();
 		// create a variable nl node for x1
 		nlNodeVariablePoint = new OSnLNodeVariable();
 		nlNodeVariablePoint->idx=1;
@@ -298,8 +321,8 @@ int  main(){
 		nlNodeVec.push_back( nlNodePoint);
 		// the vectors are in postfix format
 		// now the expression tree
-		osinstance->instanceData->nonlinearExpressions->nl[ 5]->osExpressionTree->m_treeRoot =
-			nlNodeVec[ 0]->createExpressionTreeFromPostfix( nlNodeVec);
+		osinstance->instanceData->nonlinearExpressions->nl[ 6]->osExpressionTree->m_treeRoot =
+			((OSnLNode*)nlNodeVec[ 0])->createExpressionTreeFromPostfix( nlNodeVec);
 		nlNodeVec.clear();
 		//
 		//
